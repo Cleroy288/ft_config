@@ -30,15 +30,19 @@ import (
 // The struct fields must have an `env` tag with the environment variable name.
 // Returns an error if any required environment variable is not found.
 func Load(envFile string, configStruct any) error {
+	// Print initialization details
+	if envFile != "" {
+		logInfof("Load", "[ft_config] Initialized - loading from file: %s", envFile)
+	} else {
+		logInfof("Load", "[ft_config] Initialized - loading from OS environment variables")
+	}
+
 	// Load .env file only if path is provided
 	if envFile != "" {
-		logInfof("Load", "Loading configuration from: %s", envFile)
 		if err := godotenv.Load(envFile); err != nil {
 			logError("Load", err)
 			return errors.Join(ErrLoadEnv, err)
 		}
-	} else {
-		logInfof("Load", "Loading configuration from OS environment variables")
 	}
 
 	// Use reflection to fill struct fields

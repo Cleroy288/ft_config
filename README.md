@@ -57,6 +57,8 @@ func main() {
 
     // One function call - that's it!
     err := ft_config.Load(".env", &config)
+    // Prints: [ft_config] [Load] [ft_config] Initialized - loading from file: .env
+
     if err != nil {
         log.Fatal(err)
     }
@@ -65,6 +67,15 @@ func main() {
     log.Printf("Starting on port: %s", config.Port)
     log.Printf("Database: %s", config.DatabaseURL)
 }
+```
+
+**Output:**
+```
+[ft_config] [Load] [ft_config] Initialized - loading from file: .env
+[ft_config] [Load] Loaded SUPABASE_ANON_KEY -> SupabaseKey
+[ft_config] [Load] Successfully loaded all configuration values
+Starting on port: 8080
+Database: postgres://localhost:5432/mydb
 ```
 
 That's it! No mapping, no service creation, no complexity. Just **one function call**.
@@ -158,7 +169,7 @@ func main() {
 
 ### `Load(envFile string, configStruct any) error`
 
-Loads environment variables from a `.env` file and fills the provided struct. If `envFile` is an empty string (`""`), it loads from OS environment variables only.
+Loads environment variables from a `.env` file and fills the provided struct. If `envFile` is an empty string (`""`), it loads from OS environment variables only. Prints initialization status on load.
 
 **Parameters:**
 - `envFile` - Path to .env file (e.g., `".env"`, `"config/.env"`), or `""` for OS environment only
@@ -167,20 +178,19 @@ Loads environment variables from a `.env` file and fills the provided struct. If
 **Returns:**
 - `error` - `ErrLoadEnv` if file cannot be loaded, or error listing all missing required variables
 
-**Example:**
+**Initialization Output:**
 ```go
-type Config struct {
-    ApiKey string `env:"API_KEY"`
-    Port   string `env:"PORT"`
-}
-
 // Load from .env file
 var config Config
 err := ft_config.Load(".env", &config)
+// Prints: [ft_config] [Load] [ft_config] Initialized - loading from file: .env
 
-// Or load from OS environment variables only
+// Load from OS environment variables
 err := ft_config.Load("", &config)
+// Prints: [ft_config] [Load] [ft_config] Initialized - loading from OS environment variables
 ```
+
+This helps verify the configuration loader was initialized correctly with the expected source.
 
 **Rules:**
 - ✅ Struct fields must have an `env` tag to be loaded
@@ -428,10 +438,6 @@ This package follows Go best practices:
 - ✅ Extensive documentation
 - ✅ 100% test coverage
 - ✅ Zero complexity
-
-## License
-
-MIT License - feel free to use in your projects!
 
 ## Author
 
