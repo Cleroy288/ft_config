@@ -4,13 +4,13 @@ A clean, production-ready Go package for managing environment configuration with
 
 ## Features
 
-✅ **Constructor-based configuration** - Define your config mapping upfront
-✅ **Dual access patterns** - Dynamic (`cfg.Get()`) or direct field access
-✅ **Thread-safe** - Safe for concurrent use
-✅ **Zero dependencies** - Only uses `godotenv` for .env loading
-✅ **Clean error handling** - Sentinel errors for type-safe error checking
-✅ **Optional logging** - Built-in logging that's disabled by default
-✅ **Production-ready** - 100% test coverage with 14 passing tests
+- ✅ **Constructor-based configuration** - Define your config mapping upfront
+- ✅ **Dual access patterns** - Dynamic (`cfg.Get()`) or direct field access
+- ✅ **Thread-safe** - Safe for concurrent use
+- ✅ **Zero dependencies** - Only uses `godotenv` for .env loading
+- ✅ **Clean error handling** - Sentinel errors for type-safe error checking
+- ✅ **Optional logging** - Built-in logging that's disabled by default
+- ✅ **Production-ready** - 100% test coverage with 14 passing tests
 
 ## Installation
 
