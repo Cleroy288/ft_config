@@ -14,7 +14,9 @@ import (
 )
 
 // Load loads environment variables from a .env file and fills the provided struct.
-// If envFile is an empty string, it loads from OS environment variables only.
+// envFile is the path to the .env file (empty string to load from OS environment only).
+// configStruct is a pointer to the struct to populate with environment values.
+// Returns an error if any required environment variable is not found.
 //
 // Usage:
 //
@@ -28,25 +30,37 @@ import (
 //	err := ft_config.Load(".env", &config)
 //
 // The struct fields must have an `env` tag with the environment variable name.
-// Returns an error if any required environment variable is not found.
 func Load(envFile string, configStruct any) error {
-	// Print initialization details
+	var (
+		v           reflect.Value
+		t           reflect.Type
+		missingVars []string
+		field       reflect.Value
+		fieldType   reflect.StructField
+		envKey      string
+		envValue    string
+		exists      bool
+		err         error
+		i           int
+	)
+
+	// print initialization details
 	if envFile != "" {
 		logInfof("Load", "[ft_config] Initialized - loading from file: %s", envFile)
 	} else {
 		logInfof("Load", "[ft_config] Initialized - loading from OS environment variables")
 	}
 
-	// Load .env file only if path is provided
+	// load .env file only if path is provided
 	if envFile != "" {
-		if err := godotenv.Load(envFile); err != nil {
+		if err = godotenv.Load(envFile); err != nil {
 			logError("Load", err)
 			return errors.Join(ErrLoadEnv, err)
 		}
 	}
 
-	// Use reflection to fill struct fields
-	v := reflect.ValueOf(configStruct)
+	// use reflection to fill struct fields
+	v = reflect.ValueOf(configStruct)
 	if v.Kind() != reflect.Ptr {
 		return errors.New("config must be a pointer to a struct")
 	}
@@ -56,34 +70,34 @@ func Load(envFile string, configStruct any) error {
 		return errors.New("config must be a pointer to a struct")
 	}
 
-	t := v.Type()
-	var missingVars []string
+	t = v.Type()
+	missingVars = []string{}
 
-	// Iterate through struct fields
-	for i := 0; i < v.NumField(); i++ {
-		field := v.Field(i)
-		fieldType := t.Field(i)
+	// iterate through struct fields
+	for i = 0; i < v.NumField(); i++ {
+		field = v.Field(i)
+		fieldType = t.Field(i)
 
-		// Get env tag
-		envKey := fieldType.Tag.Get("env")
+		// get env tag
+		envKey = fieldType.Tag.Get("env")
 		if envKey == "" {
-			continue // Skip fields without env tag
+			continue
 		}
 
-		// Check if field is settable
+		// check if field is settable
 		if !field.CanSet() {
 			logInfof("Load", "Field %s is not settable", fieldType.Name)
 			continue
 		}
 
-		// Get value from environment
-		envValue, exists := os.LookupEnv(envKey)
+		// get value from environment
+		envValue, exists = os.LookupEnv(envKey)
 		if !exists {
 			missingVars = append(missingVars, envKey)
 			continue
 		}
 
-		// Set the field value
+		// set the field value
 		if field.Kind() == reflect.String {
 			field.SetString(envValue)
 			logInfof("Load", "Loaded %s -> %s", envKey, fieldType.Name)
@@ -92,10 +106,10 @@ func Load(envFile string, configStruct any) error {
 		}
 	}
 
-	// Return error if any variables are missing
+	// return error if any variables are missing
 	if len(missingVars) > 0 {
-		err := errors.New("missing required environment variables: " + missingVars[0])
-		for i := 1; i < len(missingVars); i++ {
+		err = errors.New("missing required environment variables: " + missingVars[0])
+		for i = 1; i < len(missingVars); i++ {
 			err = errors.New(err.Error() + ", " + missingVars[i])
 		}
 		logError("Load", err)
